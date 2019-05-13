@@ -349,18 +349,19 @@ end
 
 # regular expressions for scanning project & manifest files
 
-const re_section            = r"^\s*\["
-const re_array_of_tables    = r"^\s*\[\s*\["
-const re_section_deps       = r"^\s*\[\s*\"?deps\"?\s*\]\s*(?:#|$)"
-const re_section_capture    = r"^\s*\[\s*\[\s*\"?(\w+)\"?\s*\]\s*\]\s*(?:#|$)"
-const re_subsection_deps    = r"^\s*\[\s*\"?(\w+)\"?\s*\.\s*\"?deps\"?\s*\]\s*(?:#|$)"
-const re_key_to_string      = r"^\s*(\w+)\s*=\s*\"(.*)\"\s*(?:#|$)"
-const re_uuid_to_string     = r"^\s*uuid\s*=\s*\"(.*)\"\s*(?:#|$)"
-const re_name_to_string     = r"^\s*name\s*=\s*\"(.*)\"\s*(?:#|$)"
-const re_path_to_string     = r"^\s*path\s*=\s*\"(.*)\"\s*(?:#|$)"
-const re_hash_to_string     = r"^\s*git-tree-sha1\s*=\s*\"(.*)\"\s*(?:#|$)"
-const re_manifest_to_string = r"^\s*manifest\s*=\s*\"(.*)\"\s*(?:#|$)"
-const re_deps_to_any        = r"^\s*deps\s*=\s*(.*?)\s*(?:#|$)"
+const re_section                = r"^\s*\["
+const re_array_of_tables        = r"^\s*\[\s*\["
+const re_section_deps           = r"^\s*\[\s*\"?deps\"?\s*\]\s*(?:#|$)"
+const re_section_capture        = r"^\s*\[\s*\[\s*\"?(\w+)\"?\s*\]\s*\]\s*(?:#|$)"
+const re_subsection_deps        = r"^\s*\[\s*\"?(\w+)\"?\s*\.\s*\"?deps\"?\s*\]\s*(?:#|$)"
+const re_key_to_string          = r"^\s*(\w+)\s*=\s*\"(.*)\"\s*(?:#|$)"
+const re_uuid_to_string         = r"^\s*uuid\s*=\s*\"(.*)\"\s*(?:#|$)"
+const re_name_to_string         = r"^\s*name\s*=\s*\"(.*)\"\s*(?:#|$)"
+const re_path_to_string         = r"^\s*path\s*=\s*\"(.*)\"\s*(?:#|$)"
+const re_git_hash_to_string     = r"^\s*(git-tree-sha1|tarball-hash-sha256)\s*=\s*\"(.*)\"\s*(?:#|$)"
+const re_tarball_hash_to_string = r"^\s*tarball-hash-sha256\s*=\s*\"(.*)\"\s*(?:#|$)"
+const re_manifest_to_string     = r"^\s*manifest\s*=\s*\"(.*)\"\s*(?:#|$)"
+const re_deps_to_any            = r"^\s*deps\s*=\s*(.*?)\s*(?:#|$)"
 
 # find project file's top-level UUID entry (or nothing)
 function project_file_name_uuid(project_file::String, name::String)::PkgId
@@ -575,8 +576,10 @@ function explicit_manifest_uuid_path(project_file::String, pkg::PkgId)::Union{No
                 uuid = UUID(m.captures[1])
             elseif (m = match(re_path_to_string, line)) !== nothing
                 path = String(m.captures[1])
-            elseif (m = match(re_hash_to_string, line)) !== nothing
+            elseif (m = match(re_git_hash_to_string, line)) !== nothing
                 hash = SHA1(m.captures[1])
+            elseif (m = match(re_tarball_hash_to_string, line)) !== nothing
+                hash = SHA1(sha1(m.captures[1]))
             end
         end
         uuid == pkg.uuid || return nothing
