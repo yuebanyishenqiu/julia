@@ -65,6 +65,14 @@
 #  define JL_THREAD_LOCAL
 #endif
 
+#if defined(__has_feature)
+#if __has_feature(address_sanitizer)
+#define JL_ASAN_ENABLED     // Clang flavor
+#endif
+#elif defined(__SANITIZE_ADDRESS__)
+#define JL_ASAN_ENABLED     // GCC flavor
+#endif
+
 #define container_of(ptr, type, member) \
     ((type *) ((char *)(ptr) - offsetof(type, member)))
 
