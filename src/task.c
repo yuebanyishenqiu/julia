@@ -701,7 +701,7 @@ static void start_basefiber(void)
 {
     jl_ptls_t ptls = jl_get_ptls_states();
     if (jl_setjmp(ptls->base_ctx.uc_mcontext, 0))
-        start_task(); // sanitizer_finish_swtich_fiber is part of start_task
+        start_task(); // sanitizer_finish_switch_fiber is part of start_task
     sanitizer_start_switch_fiber(jl_root_task->stkbuf, jl_root_task->bufsz);
     jl_longjmp(jl_root_task->ctx.uc_mcontext, 1);
     abort(); // unreachable
@@ -887,7 +887,7 @@ static void start_basefiber(void)
 {
     jl_ptls_t ptls = jl_get_ptls_states();
     if (jl_setjmp(ptls->base_ctx.uc_mcontext, 0))
-        start_task(); // sanitizer_finish_swtich_fiber is part of start_task
+        start_task(); // sanitizer_finish_switch_fiber is part of start_task
 }
 static char *jl_alloc_fiber(jl_ucontext_t *t, size_t *ssize, jl_task_t *owner)
 {
@@ -1022,7 +1022,7 @@ void jl_init_root_task(void *stack_lo, void *stack_hi)
         ptls->stackbase = stack_hi;
         ptls->stacksize = ssize;
         if (jl_setjmp(ptls->base_ctx.uc_mcontext, 0))
-            start_task(); // sanitizer_finish_swtich_fiber is part of start_task
+            start_task(); // sanitizer_finish_switch_fiber is part of start_task
     }
     else {
         jl_init_basefiber(JL_STACK_SIZE);
