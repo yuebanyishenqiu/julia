@@ -28,6 +28,7 @@ let
             :Serialization,
             :Libdl,
             :Markdown,
+            :MbedTLS,
             :LibGit2,
             :Logging,
             :Sockets,
