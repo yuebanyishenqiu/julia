@@ -595,11 +595,7 @@ function trypoptask(W::StickyWorkqueue)
 end
 
 @noinline function poptaskref(W::StickyWorkqueue)
-    task = trypoptask(W)
-    if !(task isa Task)
-        gettask = () -> trypoptask(W)
-        task = ccall(:jl_task_get_next, Any, (Any,), gettask)::Task
-    end
+    task = ccall(:jl_task_get_next, Ref{Task}, (Any, Any), trypoptask, W)
     return Ref(task)
 end
 
