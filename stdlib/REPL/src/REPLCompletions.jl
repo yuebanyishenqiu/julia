@@ -154,7 +154,11 @@ function complete_symbol(sym, ffunc, context_module=Main)::Vector{Completion}
     else
         # Looking for a member of a type
         if t isa DataType && t != Any
-            fields = fieldnames(t)
+            fields = try
+                fieldnames(t)
+            catch
+                ()
+            end
             for field in fields
                 s = string(field)
                 if startswith(s, name)
