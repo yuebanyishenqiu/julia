@@ -266,6 +266,21 @@ end
             @test vec(readdlm(io, ',')) == x
         end
     end
+    for writefunc in ((io,x) -> show(io, "text/tab-separated-values", x),
+                      (io,x) -> invoke(writedlm, Tuple{IO,Any,Any}, io, x, "\t"))
+        # iterable collections of iterable rows:
+        let x = [(1,2), (3,4)], io = IOBuffer()
+            writefunc(io, x)
+            seek(io, 0)
+            @test readdlm(io, '\t') == [1 2; 3 4]
+        end
+        # vectors of strings:
+        let x = ["foo", "bar"], io = IOBuffer()
+            writefunc(io, x)
+            seek(io, 0)
+            @test vec(readdlm(io, '\t')) == x
+        end
+    end
 end
 
 # Test that we can read a write protected file
@@ -275,6 +290,13 @@ let fn = tempname()
     end
     chmod(fn, 0o444)
     readdlm(fn)[] == "Julia"
+    rm(fn)
+end
+
+# test writedlm with a filename instead of io input
+let fn = tempname(), x = ["a" "b"; "d" ""]
+    writedlm(fn, x, ',')
+    @test readdlm(fn, ',') == x
     rm(fn)
 end
 
