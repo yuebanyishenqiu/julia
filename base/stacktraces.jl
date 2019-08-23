@@ -106,12 +106,13 @@ inlined at that point, innermost function first.
 """
 function lookup(pointer::Ptr{Cvoid})
     infos = ccall(:jl_lookup_code_address, Any, (Ptr{Cvoid}, Cint), pointer - 1, false)
-    isempty(infos) && return [StackFrame(empty_sym, empty_sym, -1, nothing, true, false, convert(UInt64, pointer))]
+    pointer = convert(UInt64, pointer)
+    isempty(infos) && return [StackFrame(empty_sym, empty_sym, -1, nothing, true, false, pointer)]
     res = Vector{StackFrame}(undef, length(infos))
     for i in 1:length(infos)
         info = infos[i]
-        @assert(length(info) == 7)
-        res[i] = StackFrame(info[1], info[2], info[3], info[4], info[5], info[6], info[7])
+        @assert(length(info) == 6)
+        res[i] = StackFrame(info[1], info[2], info[3], info[4], info[5], info[6], pointer)
     end
     return res
 end
